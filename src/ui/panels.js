@@ -114,7 +114,7 @@ export function updateDataPanel(gameState) {
 export function updateStory(score) {
   let html = '';
   for (let i = 0; i <= score; i++) {
-    if (storyFragments[i]) html += storyFragments[i] + ' ';
+    if (storyFragments[i]) html += storyFragments[i] + '<br />';
   }
   elements.storyContent.innerHTML = html || '<p>The realm awaits its defender...</p>';
   elements.storyContent.scrollTop = elements.storyContent.scrollHeight;

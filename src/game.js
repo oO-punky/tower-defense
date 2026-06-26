@@ -11,7 +11,19 @@ import { triggerScreenShake, waveAnnouncement } from './systems/effects.js';
 import { playSoundWithPitch } from './systems/audio.js';
 import { updateDataPanel, updateStory, updateTowerShopAffordability, updateTowerMenu, setStatusText, setSelectedTower } from './ui/panels.js';
 import { showGameOver } from './ui/game-over.js';
-import * as pathModules from './paths/index.js';
+import { serpentinePath } from './paths/serpentine.js';
+import { spiralPath } from './paths/spiral.js';
+import { splitPath } from './paths/split.js';
+import { crossPath } from './paths/cross.js';
+import { labyrinthPath } from './paths/labyrinth.js';
+
+const paths = {
+  serpentine: serpentinePath,
+  spiral: spiralPath,
+  split: splitPath,
+  cross: crossPath,
+  labyrinth: labyrinthPath,
+};
 
 export class Game {
   constructor(canvas, audioElements, callbacks) {
@@ -168,7 +180,7 @@ export class Game {
 
     if (newPathName !== this.currentPathName) {
       this.currentPathName = newPathName;
-      this.currentPath = pathModules[this.currentPathName + 'Path'];
+      this.currentPath = paths[this.currentPathName];
       this.rebuildPathTiles();
     }
 
@@ -368,8 +380,18 @@ export class Game {
 
     for (const tile of this.pathTiles) {
       const [tx, ty] = tile.split(',').map(Number);
-      ctx.fillStyle = 'rgba(192, 132, 252, 0.08)';
+      // Dark solid base for contrast against the background image
+      ctx.fillStyle = 'rgba(10, 10, 26, 0.65)';
       ctx.fillRect(tx * this.gridSize, ty * this.gridSize, this.gridSize, this.gridSize);
+
+      // Neon-purple glow overlay
+      ctx.fillStyle = 'rgba(192, 132, 252, 0.22)';
+      ctx.fillRect(tx * this.gridSize, ty * this.gridSize, this.gridSize, this.gridSize);
+
+      // Neon grid borders for clear path definition
+      ctx.strokeStyle = 'rgba(192, 132, 252, 0.35)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(tx * this.gridSize, ty * this.gridSize, this.gridSize, this.gridSize);
     }
 
     if (this.selectedTowerType && this.hoverTile &&
@@ -505,11 +527,8 @@ export class Game {
     this.projectiles = [];
     this.particles.clear();
 
-    const pathEntries = Object.entries(pathModules);
-    if (pathEntries.length > 0) {
-      this.currentPathName = 'serpentine';
-      this.currentPath = pathModules.serpentinePath;
-    }
+    this.currentPathName = 'serpentine';
+    this.currentPath = paths.serpentine;
     this.rebuildPathTiles();
 
     this.gameRunning = true;
@@ -556,11 +575,8 @@ export class Game {
     this.selectedPlacedTower = null;
     this.gameRunning = false;
 
-    const pathEntries = Object.entries(pathModules);
-    if (pathEntries.length > 0) {
-      this.currentPathName = 'serpentine';
-      this.currentPath = pathModules.serpentinePath;
-    }
+    this.currentPathName = 'serpentine';
+    this.currentPath = paths.serpentine;
     this.rebuildPathTiles();
     updateDataPanel(this);
     updateTowerShopAffordability(this.gold);

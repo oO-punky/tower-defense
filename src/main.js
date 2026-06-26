@@ -77,8 +77,10 @@ function startGame() {
   setSelectedTower(null);
   setStatusText('ACTIVE');
 
-  audioElements.backgroundMusic.volume = game.musicVolume;
-  audioElements.backgroundMusic.play().catch(() => {});
+  if (game.audioEnabled) {
+    audioElements.backgroundMusic.volume = game.musicVolume;
+    audioElements.backgroundMusic.play().catch(() => {});
+  }
 
   game.start();
 }
@@ -90,6 +92,7 @@ function resetAndShowStart() {
   hideGameOver();
   audioElements.backgroundMusic.pause();
   audioElements.backgroundMusic.currentTime = 0;
+  document.getElementById('audio-toggle').textContent = game.audioEnabled ? '\uD83D\uDD0A' : '\uD83D\uDD07';
   showStartScreen();
 }
 
