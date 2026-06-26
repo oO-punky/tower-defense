@@ -1,5 +1,5 @@
 export const TOWER_TYPES = {
-  ARROW: {
+  arrow: {
     id: 'arrow',
     name: 'MUSHROOM',
     icon: '\uD83C\uDF44',
@@ -12,7 +12,7 @@ export const TOWER_TYPES = {
     upgradeMultiplier: 1.6,
     upgradeCostMultiplier: 1.8,
   },
-  CANNON: {
+  cannon: {
     id: 'cannon',
     name: 'TEACUP',
     icon: '\uD83C\uDF75',
@@ -27,7 +27,7 @@ export const TOWER_TYPES = {
     upgradeMultiplier: 1.5,
     upgradeCostMultiplier: 1.7,
   },
-  ICE: {
+  ice: {
     id: 'ice',
     name: 'CROWN',
     icon: '\uD83D\uDC51',
@@ -42,7 +42,7 @@ export const TOWER_TYPES = {
     upgradeMultiplier: 1.3,
     upgradeCostMultiplier: 1.6,
   },
-  CHAIN: {
+  chain: {
     id: 'chain',
     name: 'POCKET WATCH',
     icon: '\u23F0',
@@ -57,7 +57,7 @@ export const TOWER_TYPES = {
     upgradeMultiplier: 1.5,
     upgradeCostMultiplier: 1.7,
   },
-  CHESHIRE: {
+  cheshire: {
     id: 'cheshire',
     name: 'CHESHIRE',
     icon: '\uD83D\uDC31',

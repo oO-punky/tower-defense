@@ -217,7 +217,11 @@ button, input, select, textarea { font-family: inherit; }
   margin-bottom: 0.25rem; min-height: 2.5rem; line-height: 1.4;
 }
 .tower-info-text { color: var(--accent-tertiary); }
-.tower-btn { width: 100%; margin-bottom: 4px; }
+.tower-btn { flex: 1; }
+.tower-btn:disabled {
+  opacity: 0.35; cursor: not-allowed;
+  background: rgba(0,0,0,0.15); color: var(--text-secondary);
+}
 
 /* Control Panel */
 .control-panel {

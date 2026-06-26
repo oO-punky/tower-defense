@@ -84,8 +84,14 @@ export function updateTowerMenu(tower, gold) {
   `;
   elements.sellBtn.style.display = 'inline-block';
   elements.sellBtn.textContent = `SELL (${sellValue}g)`;
-  elements.upgradeBtn.style.display = upgradeCost && gold >= upgradeCost ? 'inline-block' : 'none';
-  if (upgradeCost) elements.upgradeBtn.textContent = `UPGRADE (${upgradeCost}g)`;
+
+  elements.upgradeBtn.style.display = 'inline-block';
+  if (upgradeCost) {
+    elements.upgradeBtn.textContent = `UPGRADE (${upgradeCost}g)`;
+  } else {
+    elements.upgradeBtn.textContent = 'MAX LEVEL';
+  }
+  elements.upgradeBtn.disabled = !(upgradeCost && gold >= upgradeCost);
 }
 
 function getTotalInvestment(tower) {

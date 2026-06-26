@@ -6,7 +6,7 @@ import {
   STARTING_GOLD, STARTING_LIVES, TOTAL_WAVES, waveDefs,
 } from './config.js';
 import { addTerminalLine } from './systems/terminal.js';
-import { createBurst, createScorePopup, createMegaExplosion, createProjectileImpact, clearAllParticles } from './systems/particles.js';
+import { ParticleSystem } from './systems/particle-system.js';
 import { triggerScreenShake, waveAnnouncement } from './systems/effects.js';
 import { playSoundWithPitch } from './systems/audio.js';
 import { updateDataPanel, updateStory, updateTowerShopAffordability, updateTowerMenu, setStatusText, setSelectedTower } from './ui/panels.js';
@@ -54,6 +54,8 @@ export class Game {
     this.gameOver = false;
     this.loopId = null;
     this.prevTime = 0;
+
+    this.particles = new ParticleSystem();
 
     this.selectedTowerType = null;
     this.hoverTile = null;
@@ -269,12 +271,9 @@ export class Game {
       if (proj.arrived) {
         for (const result of proj.results) {
           if (result.type === 'hit') {
-            const canvasRect = this.canvas.getBoundingClientRect();
-            const wx = canvasRect.left + result.x * (canvasRect.width / CANVAS_SIZE);
-            const wy = canvasRect.top + result.y * (canvasRect.height / CANVAS_SIZE);
-            createProjectileImpact(wx, wy, result.color);
+            this.particles.impact(result.x, result.y, result.color);
             if (result.isCrit) {
-              createScorePopup(wx, wy, `${Math.floor(result.damage)}!`, '#facc15');
+              this.particles.popup(result.x, result.y, `${Math.floor(result.damage)}!`, '#facc15');
             }
           }
         }
@@ -288,11 +287,8 @@ export class Game {
         this.kills++;
         this.gold += enemy.goldValue;
 
-        const canvasRect = this.canvas.getBoundingClientRect();
-        const wx = canvasRect.left + enemy.pixelX * (canvasRect.width / CANVAS_SIZE);
-        const wy = canvasRect.top + enemy.pixelY * (canvasRect.height / CANVAS_SIZE);
-        createBurst(wx, wy, [enemy.color, '#ffffff', '#dddddd'], this.burstIntensity, 'death');
-        createScorePopup(wx, wy, `+${enemy.goldValue}g`, enemy.color);
+        this.particles.burst(enemy.pixelX, enemy.pixelY, [enemy.color, '#ffffff', '#dddddd'], this.burstIntensity);
+        this.particles.popup(enemy.pixelX, enemy.pixelY, `+${enemy.goldValue}g`, enemy.color);
         this.callbacks.onKill?.(enemy);
 
         addTerminalLine(
@@ -309,6 +305,8 @@ export class Game {
         this.enemies.length === 0) {
       this.waveCleared();
     }
+
+    this.particles.update(dt);
 
     updateDataPanel(this);
     updateTowerShopAffordability(this.gold);
@@ -469,6 +467,8 @@ export class Game {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(proj.x - 1.5, proj.y - 1.5, 3, 3);
     }
+
+    this.particles.draw(ctx);
   }
 
   loop(timestamp) {
@@ -503,6 +503,7 @@ export class Game {
     this.towers = [];
     this.enemies = [];
     this.projectiles = [];
+    this.particles.clear();
 
     const pathEntries = Object.entries(pathModules);
     if (pathEntries.length > 0) {
@@ -540,7 +541,7 @@ export class Game {
   reset() {
     cancelAnimationFrame(this.loopId);
     cancelAnimationFrame(this.pulseId);
-    clearAllParticles();
+    this.particles.clear();
     this.currentWave = 0;
     this.gold = STARTING_GOLD;
     this.lives = STARTING_LIVES;

@@ -1,18 +1,14 @@
 import '/src/style.css';
 import gsap from 'gsap';
-import { Physics2DPlugin } from 'gsap/Physics2DPlugin';
-
-gsap.registerPlugin(Physics2DPlugin);
 
 import { Game } from './game.js';
 import { initLoading } from './ui/loading.js';
 import { setupStartScreen, showStartScreen } from './ui/start-screen.js';
 import { setupGameOverButtons, hideGameOver, showGameOver } from './ui/game-over.js';
 import { setupPanels, setupSettings, updateDataPanel, updateTowerMenu, setSelectedTower, setStatusText } from './ui/panels.js';
-import { TOWER_TYPES } from './config.js';
+import { CANVAS_SIZE } from './config.js';
 import { initAudioContext, preloadAllAudio, playSoundWithPitch, stopAllSfx } from './systems/audio.js';
 import { addTerminalLine } from './systems/terminal.js';
-import { createBurst, createMegaExplosion } from './systems/particles.js';
 import { triggerScreenShake } from './systems/effects.js';
 
 const canvas = document.getElementById('game-canvas');
@@ -40,10 +36,7 @@ function startGame() {
     game = new Game(canvas, audioElements, {
       onBuild(tower) {
         playSound('build', { pitchMin: 0.9, pitchMax: 1.1 });
-        const canvasRect = canvas.getBoundingClientRect();
-        const wx = canvasRect.left + tower.pixelX * (canvasRect.width / 600);
-        const wy = canvasRect.top + tower.pixelY * (canvasRect.height / 600);
-        createBurst(wx, wy, [tower.color, '#ffffff'], game.burstIntensity, 'build');
+        game.particles.burst(tower.pixelX, tower.pixelY, [tower.color, '#ffffff'], game.burstIntensity);
       },
       onUpgrade(tower) {
         playSound('upgrade', { volume: 0.8, pitchMin: 1.0, pitchMax: 1.3 });
@@ -66,10 +59,8 @@ function startGame() {
         stopAllSfx();
         if (!isVictory) {
           playSound('gameOver', { volume: 1.0, pitchMin: 0.85, pitchMax: 0.95 });
-          const canvasRect = canvas.getBoundingClientRect();
-          const cx = canvasRect.left + canvasRect.width / 2;
-          const cy = canvasRect.top + canvasRect.height / 2;
-          createMegaExplosion(cx, cy, game.burstIntensity, game.sfxVolume, playSound);
+          playSound('explosion', { volume: 0.7, pitchMin: 0.55, pitchMax: 0.65 });
+          game.particles.explosion(CANVAS_SIZE / 2, CANVAS_SIZE / 2, game.burstIntensity);
           triggerScreenShake(canvas, 1.5, 1.2);
         } else {
           playSound('waveClear', { volume: 1.0, pitchMin: 1.1, pitchMax: 1.4 });
@@ -171,7 +162,14 @@ function updateClock() {
 }
 updateClock();
 
-// Visibility change
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (!game || !game.gameRunning || game.gamePaused) return;
+  if (e.key === 'u') {
+    e.preventDefault();
+    game.upgradeTower();
+  }
+});
 document.addEventListener('visibilitychange', () => {
   if (!game) return;
   if (document.hidden) {
