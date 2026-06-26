@@ -1,5 +1,5 @@
 {
-  "name": "tower-defense",
+  "name": "wonderland-tower-defense",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,13 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "gsap": "^3.13.0"
   },
   "devDependencies": {
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.2",
     "oxlint": "^1.69.0",
     "vite": "^8.1.0"
   }

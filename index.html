@@ -1,13 +1,221 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tower-defense</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WONDERLAND TOWER DEFENSE</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+
+<div class="pixel-background"></div>
+<div class="grid-overlay"></div>
+<div class="meteor-container" id="meteor-container"></div>
+
+<div class="pixel-reveal-container" id="pixel-reveal-container"></div>
+
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-container">
+    <div class="heart-preloader-container">
+      <div class="pixel-heart-container">
+        <div class="pixel-heart"></div>
+      </div>
+      <div class="loading-progress">
+        <div class="loading-progress-bar" id="loading-progress-bar"></div>
+      </div>
+    </div>
+    <p class="loading-text">FORTIFYING<br />THE WONDERLAND</p>
+  </div>
+</div>
+
+<div class="game-canvas-container">
+  <canvas id="game-canvas" class="game-canvas" width="600" height="600"></canvas>
+  <div class="pixelated-border"></div>
+</div>
+
+<div class="floating-particles" id="floating-particles"></div>
+
+<div class="interface-container">
+  <div class="header">
+    <div class="header-item"></div>
+    <div class="header-item">WONDERLAND.TD<br />DEFEND THE REALM v1.0</div>
+    <div class="header-item" id="timestamp">SYS_TIME: 00:00:00</div>
+  </div>
+</div>
+
+<!-- Data Panel -->
+<div class="data-panel" id="data-panel">
+  <div class="data-panel-title">
+    <span>REALM STATUS</span>
+    <span id="status-indicator">⬤</span>
+  </div>
+  <div class="data-bar">
+    <div class="data-bar-fill" id="wave-progress-bar" style="width: 0%;"></div>
+  </div>
+  <div class="data-readouts">
+    <div class="data-row">
+      <span class="data-label">WAVE:</span>
+      <span class="data-value" id="wave-value">0/50</span>
+    </div>
+    <div class="data-row">
+      <span class="data-label">LIVES:</span>
+      <span class="data-value" id="lives-value">20</span>
+    </div>
+    <div class="data-row">
+      <span class="data-label">GOLD:</span>
+      <span class="data-value" id="gold-value">100</span>
+    </div>
+    <div class="data-row">
+      <span class="data-label">KILLS:</span>
+      <span class="data-value" id="kills-value">0</span>
+    </div>
+    <div class="data-row">
+      <span class="data-label">STATUS:</span>
+      <span class="data-value" id="status-value">AWAITING</span>
+    </div>
+  </div>
+</div>
+
+<!-- Tower Shop Panel -->
+<div class="tower-shop-panel" id="tower-shop-panel">
+  <div class="panel-header">
+    <span class="data-panel-title">TOWER SHOP</span>
+  </div>
+  <div class="tower-shop-grid" id="tower-shop-grid"></div>
+  <div class="tower-info" id="tower-info">
+    <span class="tower-info-text">SELECT A TOWER</span>
+  </div>
+  <div class="buttons">
+    <button class="btn tower-btn" id="sell-btn" style="display:none;">SELL TOWER</button>
+    <button class="btn tower-btn" id="upgrade-btn" style="display:none;">UPGRADE</button>
+  </div>
+</div>
+
+<!-- Control Panel -->
+<div class="control-panel" id="control-panel">
+  <div class="panel-header">
+    <span class="data-panel-title">CONTROLS</span>
+  </div>
+  <div class="control-group">
+    <div class="control-row">
+      <span class="control-label">GAME SPEED</span>
+      <span class="control-value" id="speed-value">1.0</span>
+    </div>
+    <div class="slider-container">
+      <input type="range" min="0.5" max="3" value="1" step="0.1" class="slider" id="speed-slider">
+    </div>
+  </div>
+  <div class="control-group">
+    <div class="control-row">
+      <span class="control-label">PARTICLE POWER</span>
+      <span class="control-value" id="burst-value">1.0</span>
+    </div>
+    <div class="slider-container">
+      <input type="range" min="0.25" max="2" value="1" step="0.1" class="slider" id="burst-slider">
+    </div>
+  </div>
+  <div class="control-group">
+    <div class="control-row">
+      <span class="control-label">MUSIC VOLUME</span>
+      <span class="control-value" id="music-volume-value">0.8</span>
+    </div>
+    <div class="slider-container">
+      <input type="range" min="0" max="1" value="0.8" step="0.1" class="slider" id="music-volume-slider">
+    </div>
+  </div>
+  <div class="control-group">
+    <div class="control-row">
+      <span class="control-label">SFX VOLUME</span>
+      <span class="control-value" id="sfx-volume-value">0.5</span>
+    </div>
+    <div class="slider-container">
+      <input type="range" min="0" max="1" value="0.5" step="0.1" class="slider" id="sfx-volume-slider">
+    </div>
+  </div>
+  <div class="buttons">
+    <button class="btn" id="reset-btn">RESET</button>
+    <button class="btn" id="pause-btn">PAUSE</button>
+    <button class="btn" id="wave-btn">NEXT WAVE</button>
+  </div>
+</div>
+
+<!-- Terminal Panel -->
+<div class="terminal-panel">
+  <div class="terminal-header">
+    <span>TOWER CONSOLE</span>
+    <span id="terminal-status">READY</span>
+  </div>
+  <div class="terminal-content" id="terminal-content">
+    <div class="terminal-line">WONDERLAND_TOWER_DEFENSE v1.0 INITIALIZED.</div>
+    <div class="terminal-line command-line">td.init(gridSize: 24, waves: 50, realm: wonderland);</div>
+    <div class="terminal-line regular-line">Place towers. Defend the realm. Survive 50 waves.</div>
+    <div class="terminal-line command-line">console.log('The Queen of Hearts approaches...');</div>
+    <div class="terminal-line typing"></div>
+  </div>
+</div>
+
+<!-- Story Panel -->
+<div class="story-panel">
+  <div class="story-header">
+    <span>WONDERLAND CHRONICLE</span>
+  </div>
+  <div class="story-content" id="story-content">
+    <p>Alice stood at the edge of Wonderland, gazing upon a realm in turmoil...</p>
+  </div>
+</div>
+
+<!-- Start Screen -->
+<div class="start-screen" id="start-screen">
+  <h2 class="start-body">WONDERLAND</h2>
+  <h1 class="start-title">TOWER DEFENSE</h1>
+  <p class="start-subtitle">PLACE TOWERS TO DEFEAT THE CARD ARMY<br />SURVIVE 50 WAVES TO SAVE WONDERLAND</p>
+  <div class="start-instructions" style="margin-top: 1rem; font-size: 0.75rem; line-height: 2; color: var(--text-secondary);">
+    <div>⬤ CLICK TOWER IN SHOP → CLICK GRID TO PLACE</div>
+    <div>⬤ CLICK TOWER ON GRID → UPGRADE OR SELL</div>
+    <div>⬤ WAVES START AUTOMATICALLY</div>
+  </div>
+  <button class="start-btn" id="start-btn">DEFEND THE REALM</button>
+</div>
+
+<!-- Game Over / Victory -->
+<div class="game-over-overlay" id="game-over-overlay">
+  <div class="game-over-title" id="game-over-title">REALM FALLEN</div>
+  <div class="game-over-score">WAVES SURVIVED: <span id="final-waves">0</span></div>
+  <div class="game-over-score">CARD SOLDIERS DEFEATED: <span id="final-kills">0</span></div>
+  <button class="restart-btn" id="restart-btn">DEFEND AGAIN</button>
+  <div class="game-over-credits">
+    <p>A WONDERLAND GAME</p>
+    <p>DEFEND THE TEA PARTY. GUARD THE CROWN.</p>
+  </div>
+</div>
+
+<div class="audio-control">
+  <button class="audio-btn" id="audio-toggle">🔊</button>
+</div>
+
+<!-- Audio -->
+<audio id="background-music" loop>
+  <source src="https://assets.codepen.io/7558/webflow-gsap-song-02.mp3" type="audio/mp3">
+</audio>
+<audio id="build-sound">
+  <source src="https://assets.codepen.io/7558/eat-sound.mp3" type="audio/mp3">
+</audio>
+<audio id="game-over-sound">
+  <source src="https://assets.codepen.io/7558/game-over.mp3" type="audio/mp3">
+</audio>
+<audio id="wave-clear-sound">
+  <source src="https://assets.codepen.io/7558/level-up.mp3" type="audio/mp3">
+</audio>
+<audio id="wave-horn-sound">
+  <source src="https://assets.codepen.io/7558/meteor-sound.mp3" type="audio/mp3">
+</audio>
+<audio id="explosion-sound">
+  <source src="https://assets.codepen.io/7558/explosion.mp3" type="audio/mp3">
+</audio>
+<audio id="upgrade-sound">
+  <source src="https://assets.codepen.io/7558/gsap-webflow-sound.mp3" type="audio/mp3">
+</audio>
+
+<script type="module" src="/src/main.js"></script>
+</body>
 </html>
