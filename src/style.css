@@ -50,8 +50,10 @@ button, input, select, textarea { font-family: inherit; }
 
 .pixel-background {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background-image: url("https://assets.codepen.io/7558/pixel-bg-015.webp");
-  background-size: cover; background-position: center; z-index: 0; opacity: 0.8;
+  background-image: url("/background.webp");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center; z-index: 0; opacity: 0.4;
   image-rendering: pixelated;
 }
 

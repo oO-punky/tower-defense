@@ -50,6 +50,7 @@ export class Game {
     this.currentPathName = null;
     this.spawnQueue = [];
     this.spawnTimer = 0;
+    this.spawnIndex = 0;
     this.currentWave = 0;
     this.waveActive = false;
     this.enemiesRemainingInWave = 0;
@@ -182,8 +183,30 @@ export class Game {
       this.currentPathName = newPathName;
       this.currentPath = paths[this.currentPathName];
       this.rebuildPathTiles();
+
+      const toRemove = [];
+      for (const tower of this.towers) {
+        if (this.pathTiles.has(`${tower.tileX},${tower.tileY}`)) {
+          toRemove.push(tower);
+        }
+      }
+      for (const tower of toRemove) {
+        const def = TOWER_TYPES[tower.typeId];
+        let invested = def.cost;
+        for (let lv = 2; lv <= tower.level; lv++) invested += Math.floor(def.cost * def.upgradeCostMultiplier * (lv - 1));
+        const refund = Math.floor(invested * 0.7);
+        this.gold += refund;
+        this.towers = this.towers.filter(t => t !== tower);
+        if (this.selectedPlacedTower === tower) this.selectedPlacedTower = null;
+        addTerminalLine(`${tower.name} at (${tower.tileX},${tower.tileY}) reclaimed — path rerouted. Refund: ${refund}g`, 'tower_sell');
+      }
+      if (toRemove.length) {
+        updateTowerShopAffordability(this.gold);
+        updateTowerMenu(this.selectedPlacedTower, this.gold);
+      }
     }
 
+    this.spawnIndex = 0;
     this.spawnQueue = [...waveDef.enemies];
     this.spawnTimer = 0;
     this.waveActive = true;
@@ -204,17 +227,20 @@ export class Game {
 
   rebuildPathTiles() {
     this.pathTiles.clear();
-    for (let i = 0; i < this.currentPath.length - 1; i++) {
-      const a = this.currentPath[i];
-      const b = this.currentPath[i + 1];
-      const dx = b.x - a.x;
-      const dy = b.y - a.y;
-      const steps = Math.max(Math.abs(dx), Math.abs(dy));
-      for (let s = 0; s <= steps; s++) {
-        const t = steps === 0 ? 0 : s / steps;
-        const tx = Math.round(a.x + dx * t);
-        const ty = Math.round(a.y + dy * t);
-        this.pathTiles.add(`${tx},${ty}`);
+    const pathList = Array.isArray(this.currentPath[0]) ? this.currentPath : [this.currentPath];
+    for (const path of pathList) {
+      for (let i = 0; i < path.length - 1; i++) {
+        const a = path[i];
+        const b = path[i + 1];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const steps = Math.max(Math.abs(dx), Math.abs(dy));
+        for (let s = 0; s <= steps; s++) {
+          const t = steps === 0 ? 0 : s / steps;
+          const tx = Math.round(a.x + dx * t);
+          const ty = Math.round(a.y + dy * t);
+          this.pathTiles.add(`${tx},${ty}`);
+        }
       }
     }
   }
@@ -223,7 +249,15 @@ export class Game {
     if (this.spawnQueue.length === 0) return;
     const typeId = this.spawnQueue.shift();
     const waveDef = waveDefs[this.currentWave - 1];
-    const enemy = new Enemy(typeId, this.currentPath, waveDef.scale);
+
+    let path = this.currentPath;
+    if (Array.isArray(this.currentPath[0])) {
+      const idx = this.spawnIndex % this.currentPath.length;
+      this.spawnIndex++;
+      path = this.currentPath[idx];
+    }
+
+    const enemy = new Enemy(typeId, path, waveDef.scale);
     this.enemies.push(enemy);
   }
 
@@ -535,6 +569,7 @@ export class Game {
     this.gamePaused = false;
     this.gameOver = false;
     this.prevTime = 0;
+    this.spawnIndex = 0;
 
     addTerminalLine('Realm defenses online. Awaiting hostiles.', 'system_init');
     setStatusText('ACTIVE');
@@ -569,6 +604,7 @@ export class Game {
     this.enemies = [];
     this.projectiles = [];
     this.spawnQueue = [];
+    this.spawnIndex = 0;
     this.waveActive = false;
     this.gameOver = false;
     this.selectedTowerType = null;
